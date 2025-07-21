@@ -26,11 +26,18 @@ if [ ! -f /var/www/html/wp-config.php ]; then
 
     echo "🛠 Installing WordPress..."
     wp core install \
-      --url="https://yoti.42.fr" \
+      --url="https://${DOMAIN_NAME}" \
       --title="My Site" \
       --admin_user="$MYSQL_USER" \
       --admin_password="$MYSQL_ROOT_PASSWORD" \
       --admin_email="$WP_ADMIN_EMAIL" \
+      --allow-root
+
+    echo "👤 Creating second WordPress user..."
+    wp user create \
+      "$WP_SECOND_USER" "$WP_SECOND_EMAIL" \
+      --user_pass="$WP_SECOND_PASS" \
+      --role=subscriber \
       --allow-root
 else
     echo "✅ WordPress already installed"
