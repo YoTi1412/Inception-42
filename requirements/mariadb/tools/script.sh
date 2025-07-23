@@ -1,29 +1,54 @@
 #!/bin/bash
-set -e
-set -x 
+set -euo pipefail
 
-echo "💡 Running initialization script..."
+DATADIR="/var/lib/mysql"
+SOCKET="/run/mysqld/mysqld.sock"
+ROOT_PWD="${MYSQL_ROOT_PASSWORD:-yotipassroot}"
+INIT_SQL="/tmp/init.sql"
 
-until mysqladmin ping -uroot -p"$MYSQL_ROOT_PASSWORD" --silent; do
-  echo "⏳ Waiting for MariaDB to be ready..."
-  sleep 2
-done
+echo "🔧 MariaDB one-shot bootstrap"
 
-# If DB already exists, skip setup
-if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE;" 2>/dev/null; then
-  echo "✅ Database $MYSQL_DATABASE already exists. Skipping setup."
-else
-  echo "🛠 Creating database and user..."
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;" || { echo "Failed to create database"; exit 1; }
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" || { echo "Failed to create user"; exit 1; }
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';" || { echo "Failed to grant privileges"; exit 1; }
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;" || { echo "Failed to flush privileges"; exit 1; }
-  if [ -f /docker-entrypoint-initdb.d/wordpress.sql ]; then
-    echo "📦 Importing initial data from wordpress.sql..."
-    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $MYSQL_DATABASE < /docker-entrypoint-initdb.d/wordpress.sql || { echo "Failed to import wordpress.sql"; exit 1; }
-  else
-    echo "⚠️ wordpress.sql not found, skipping import."
-  fi
+# 0. directories
+mkdir -p /run/mysqld
+chown -R mysql:mysql /run/mysqld "$DATADIR"
+
+# 1. fresh install if needed
+[[ -d "$DATADIR/mysql" ]] || mysql_install_db --user=mysql --datadir="$DATADIR"
+
+# 2. create init SQL file
+cat > "$INIT_SQL" <<EOF
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PWD}';
+CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
+CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
+FLUSH PRIVILEGES;
+EOF
+chown mysql:mysql "$INIT_SQL"
+
+# 3. start temporary server on a Unix socket
+mysqld --user=mysql \
+       --datadir="$DATADIR" \
+       --skip-networking \
+       --socket="$SOCKET" \
+       --pid-file=/tmp/mysql-init.pid \
+       --skip-log-bin \
+       --init-file="$INIT_SQL" &
+PID=$!
+
+# 4. wait for it
+until mysqladmin ping --socket="$SOCKET" --silent; do sleep 1; done
+
+# 5. import WordPress dump if present
+if [[ -f /docker-entrypoint-initdb.d/wordpress.sql ]]; then
+    echo "📦 Importing initial data..."
+    mysql --socket="$SOCKET" -uroot -p"$ROOT_PWD" "$MYSQL_DATABASE" \
+        < /docker-entrypoint-initdb.d/wordpress.sql
 fi
 
-echo "✅ Initialization complete!"
+# 6. stop temporary server
+mysqladmin -uroot -p"$ROOT_PWD" --socket="$SOCKET" shutdown
+wait $PID
+
+# 7. start the real server
+echo "✅ Bootstrap complete – starting MariaDB server..."
+exec mysqld --user=mysql --bind-address=0.0.0.0

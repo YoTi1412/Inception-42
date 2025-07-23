@@ -16,13 +16,8 @@ RUN mkdir -p /var/run/mysqld && \
 RUN mkdir -p /var/lib/mysql && \
     chown -R mysql:mysql /var/lib/mysql
 
-# Copy init SQL and setup script
-COPY ./tools/script.sh /docker-entrypoint-initdb.d/script.sh
-COPY ./conf/wordpress.sql /docker-entrypoint-initdb.d/wordpress.sql
-
-RUN chmod +x /docker-entrypoint-initdb.d/script.sh
+COPY ./tools/script.sh /usr/local/bin/script.sh
+RUN chmod +x /usr/local/bin/script.sh
 
 EXPOSE 3306
-
-# Run MariaDB directly
-CMD ["mysqld", "--user=mysql", "--bind-address=0.0.0.0"]
+ENTRYPOINT ["/usr/local/bin/script.sh"]
