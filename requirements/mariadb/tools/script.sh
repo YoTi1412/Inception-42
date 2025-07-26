@@ -8,14 +8,26 @@ INIT_SQL="/tmp/init.sql"
 
 echo "🔧 MariaDB one-shot bootstrap"
 
-# 0. directories
+# 0. Clean up old socket and PID files
+rm -f /run/mysqld/mysqld.sock /tmp/mysql-init.pid "$INIT_SQL"
+
+# 1. Ensure /tmp is writable
+chmod 1777 /tmp
+
+# 2. directories
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld "$DATADIR"
 
-# 1. fresh install if needed
-[[ -d "$DATADIR/mysql" ]] || mysql_install_db --user=mysql --datadir="$DATADIR"
+# 3. Check if database is already initialized
+if [[ -d "$DATADIR/mysql" ]]; then
+    echo "✅ Database already initialized, skipping bootstrap..."
+    exec mysqld --user=mysql --bind-address=0.0.0.0
+fi
 
-# 2. create init SQL file
+# 4. fresh install if needed
+mysql_install_db --user=mysql --datadir="$DATADIR"
+
+# 5. create init SQL file
 cat > "$INIT_SQL" <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PWD}';
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
@@ -24,8 +36,9 @@ GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 chown mysql:mysql "$INIT_SQL"
+chmod 600 "$INIT_SQL"
 
-# 3. start temporary server on a Unix socket
+# 6. start temporary server on a Unix socket
 mysqld --user=mysql \
        --datadir="$DATADIR" \
        --skip-networking \
@@ -35,20 +48,20 @@ mysqld --user=mysql \
        --init-file="$INIT_SQL" &
 PID=$!
 
-# 4. wait for it
+# 7. wait for it
 until mysqladmin ping --socket="$SOCKET" --silent; do sleep 1; done
 
-# 5. import WordPress dump if present
+# 8. import WordPress dump if present
 if [[ -f /docker-entrypoint-initdb.d/wordpress.sql ]]; then
     echo "📦 Importing initial data..."
     mysql --socket="$SOCKET" -uroot -p"$ROOT_PWD" "$MYSQL_DATABASE" \
         < /docker-entrypoint-initdb.d/wordpress.sql
 fi
 
-# 6. stop temporary server
+# 9. stop temporary server
 mysqladmin -uroot -p"$ROOT_PWD" --socket="$SOCKET" shutdown
 wait $PID
 
-# 7. start the real server
+# 10. start the real server
 echo "✅ Bootstrap complete – starting MariaDB server..."
 exec mysqld --user=mysql --bind-address=0.0.0.0

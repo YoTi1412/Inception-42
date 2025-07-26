@@ -6,6 +6,8 @@ RUN apt-get update && apt-get -y install \
     php php-cli php-cgi php-mysql \
     php-fpm php-pdo php-gd php-mbstring \
     mariadb-client \
+    redis \
+	php-redis \
     && rm -rf /var/lib/apt/lists/*
 
 # Install WP-CLI
