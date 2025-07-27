@@ -50,6 +50,29 @@ services:
       - wordpress_data:/var/www/html
     networks:
       - network
+  
+  ftp_server:
+    container_name: ftp_server
+    depends_on:
+      - nginx
+      - redis
+    build:
+      context: ./requirements/bonus/ftp_server
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 21:21
+      - 21100-21110:21100-21110
+    env_file:
+      - .env
+    networks:
+      - network
+    volumes:
+      - wordpress_data:/var/www/html
+    environment:
+      - FTP_USER=${FTP_USER}
+      - FTP_PASSWORD=${FTP_PASSWORD}
+
 
 volumes:
   mariadb_data:
