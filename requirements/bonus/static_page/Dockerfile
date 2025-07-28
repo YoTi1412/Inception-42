@@ -20,18 +20,20 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the rest of the static page project
+# Copy the rest of the static page project, including Error_404
 COPY . .
 
 # Run the build process
 RUN npm run build
 
-# Copy built files to Nginx directory
-RUN mv /app/public /var/www/html/public && \
+# Copy Error_404 contents to public/404.html and include assets
+RUN cp Error_404/404.html /app/public/404.html && \
+    cp -r Error_404/assets /app/public/ && \
+    mv /app/public /var/www/html/public && \
     chown -R www-data:www-data /var/www/html/public && \
     chmod -R 755 /var/www/html/public
-	
-# Copy a basic Nginx configuration
+
+# Copy Nginx configuration
 COPY ./conf/nginx.conf /etc/nginx/sites-available/default
 
 # Expose port 80
