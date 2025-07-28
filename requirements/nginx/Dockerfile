@@ -4,7 +4,7 @@ FROM debian:bookworm-backports
 RUN apt-get update && apt-get install -y nginx openssl
 
 # Create directories
-RUN mkdir -p /etc/nginx/ssl /run/nginx
+RUN mkdir -p /etc/nginx/ssl /run/nginx /var/www/html
 
 # Copy nginx config and the entrypoint script
 COPY ./conf/nginx.conf /etc/nginx/conf.d/default.conf
@@ -18,4 +18,3 @@ EXPOSE 443
 
 # Run entrypoint script
 CMD ["/entrypoint.sh"]
-

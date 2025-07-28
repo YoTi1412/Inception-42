@@ -1,9 +1,12 @@
 services:
   nginx:
     container_name: nginx
-    build: ./requirements/nginx
+    build: 
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
     depends_on:
       - wordpress
+      - static-page
     ports:
       - 443:443
     volumes:
@@ -11,6 +14,19 @@ services:
     restart: always
     networks:
       - network
+    env_file:
+      - .env
+
+  static-page:
+    container_name: static-page
+    build:
+      context: ./requirements/bonus/static_page
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - network
+    env_file:
+      - .env
 
   mariadb:
     container_name: mariadb
@@ -72,7 +88,6 @@ services:
     environment:
       - FTP_USER=${FTP_USER}
       - FTP_PASSWORD=${FTP_PASSWORD}
-
 
 volumes:
   mariadb_data:
