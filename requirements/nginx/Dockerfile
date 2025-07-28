@@ -1,7 +1,8 @@
 FROM debian:bookworm-backports
 
 # Install all required packages
-RUN apt-get update && apt-get install -y nginx openssl
+RUN apt-get update && apt-get install -y nginx openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create directories
 RUN mkdir -p /etc/nginx/ssl /run/nginx /var/www/html
@@ -14,7 +15,7 @@ COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Only allow HTTPS
-EXPOSE 443
+EXPOSE 443 8080
 
 # Run entrypoint script
 CMD ["/entrypoint.sh"]
