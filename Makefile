@@ -6,7 +6,7 @@ all: up
 
 build:
 	@echo "🔨 Building Docker images..."
-	@$(DC) build # --no-cache
+	@$(DC) build #--no-cache
 
 up:
 	@echo "🚀 Starting containers..."

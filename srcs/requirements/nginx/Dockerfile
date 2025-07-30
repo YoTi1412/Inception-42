@@ -15,7 +15,7 @@ COPY ./tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Only allow HTTPS
-EXPOSE 443 8080
+EXPOSE 443
 
 # Run entrypoint script
 CMD ["/entrypoint.sh"]
