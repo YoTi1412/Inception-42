@@ -8,6 +8,7 @@ services:
       - wordpress
       - static-page
       - adminer
+      - portainer
     ports:
       - 443:443
     volumes:
@@ -103,6 +104,22 @@ services:
     depends_on:
       - mariadb
 
+  portainer:
+    container_name: portainer
+    build:
+      context: ./requirements/bonus/portainer
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      - TZ=Europe/Paris
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - network
+
 volumes:
   mariadb_data:
     driver: local
@@ -115,6 +132,12 @@ volumes:
     driver_opts:
       type: none
       device: /home/yoti/data/wordpress
+      o: bind
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/yoti/data/portainer
       o: bind
 
 networks:
