@@ -1,6 +1,6 @@
-NAME=inception
+NAME	= inception
 
-DC=docker-compose
+DC		= docker-compose -f srcs/docker-compose.yml
 
 all: up
 
@@ -22,7 +22,7 @@ restart:
 
 fclean:
 	@echo "🔥 Removing containers, volumes, images..."
-	@docker-compose down -v --rmi all
+	@$(DC) down -v --rmi all
 	@docker volume prune -f
 	@docker image prune -af
 	@docker network prune -f

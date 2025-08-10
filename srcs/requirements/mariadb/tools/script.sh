@@ -28,7 +28,7 @@ fi
 mysql_install_db --user=mysql --datadir="$DATADIR"
 
 # 5. create init SQL file
-cat > "$INIT_SQL" <<EOF
+cat > "$INIT_SQL" << EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PWD}';
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';

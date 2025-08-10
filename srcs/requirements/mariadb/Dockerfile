@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install MariaDB Server
 RUN apt-get update && \
-    apt-get install -y mariadb-server mariadb-client vim && \
+    apt-get install -y mariadb-server mariadb-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Prepare MySQL runtime directory

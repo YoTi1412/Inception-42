@@ -1,8 +1,7 @@
 FROM debian:bookworm-backports
 
 # Install PHP and dependencies
-RUN apt-get update && apt-get -y install \
-    wget curl bash \
+RUN apt-get update && apt-get -y install curl \
     php php-cli php-cgi php-mysql \
     php-fpm php-pdo php-gd php-mbstring \
     mariadb-client \
@@ -26,6 +25,6 @@ RUN chmod +x /usr/local/bin/create_wp.sh
 
 WORKDIR /var/www/html
 
-ENTRYPOINT ["/usr/local/bin/create_wp.sh"]
-
 EXPOSE 9000
+
+ENTRYPOINT ["/usr/local/bin/create_wp.sh"]

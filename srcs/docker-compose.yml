@@ -2,7 +2,7 @@ services:
   nginx:
     container_name: nginx
     build: 
-      context: ./srcs/requirements/nginx
+      context: ./requirements/nginx
       dockerfile: Dockerfile
     depends_on:
       - wordpress
@@ -22,7 +22,7 @@ services:
   static-page:
     container_name: static-page
     build:
-      context: ./srcs/requirements/bonus/static_page
+      context: ./requirements/bonus/static_page
       dockerfile: Dockerfile
     restart: always
     networks:
@@ -32,7 +32,7 @@ services:
 
   mariadb:
     container_name: mariadb
-    build: ./srcs/requirements/mariadb
+    build: ./requirements/mariadb
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
@@ -46,7 +46,7 @@ services:
     depends_on:
       - mariadb
     build:
-      context: ./srcs/requirements/wordpress
+      context: ./requirements/wordpress
       dockerfile: Dockerfile
     restart: always
     env_file:
@@ -58,24 +58,22 @@ services:
 
   redis:
     container_name: redis
-    build: ./srcs/requirements/bonus/redis
+    build: ./requirements/bonus/redis
     ports:
       - '6379:6379'
     restart: always
     env_file:
       - .env
-    volumes:
-      - wordpress_data:/var/www/html
     networks:
       - network
-  
+
   ftp_server:
     container_name: ftp_server
     depends_on:
       - nginx
       - redis
     build:
-      context: ./srcs/requirements/bonus/ftp_server
+      context: ./requirements/bonus/ftp_server
       dockerfile: Dockerfile
     restart: always
     ports:
@@ -86,7 +84,7 @@ services:
     networks:
       - network
     volumes:
-      - wordpress_data:/var/www/html
+      - wordpress_data:/var/www/html:ro
     environment:
       - FTP_USER=${FTP_USER}
       - FTP_PASSWORD=${FTP_PASSWORD}
@@ -94,7 +92,7 @@ services:
   adminer:
     container_name: adminer
     build:
-      context: ./srcs/requirements/bonus/adminer
+      context: ./requirements/bonus/adminer
       dockerfile: Dockerfile
     restart: always
     env_file:
@@ -107,7 +105,7 @@ services:
   portainer:
     container_name: portainer
     build:
-      context: ./srcs/requirements/bonus/portainer
+      context: ./requirements/bonus/portainer
       dockerfile: Dockerfile
     restart: always
     ports:
