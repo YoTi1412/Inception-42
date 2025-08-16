@@ -1,9 +1,8 @@
 #!/bin/bash
-set -euo pipefail
 
 DATADIR="/var/lib/mysql"
 SOCKET="/run/mysqld/mysqld.sock"
-ROOT_PWD="${MYSQL_ROOT_PASSWORD:-yotipassroot}"
+ROOT_PWD="$MYSQL_ROOT_PASSWORD"
 INIT_SQL="/tmp/init.sql"
 
 echo "🔧 MariaDB one-shot bootstrap"

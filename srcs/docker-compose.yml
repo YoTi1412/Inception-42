@@ -123,19 +123,19 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/yoti/data/mysql
+      device: /home/yrafai/data/mysql
       o: bind
   wordpress_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yoti/data/wordpress
+      device: /home/yrafai/data/wordpress
       o: bind
   portainer_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yoti/data/portainer
+      device: /home/yrafai/data/portainer
       o: bind
 
 networks:
