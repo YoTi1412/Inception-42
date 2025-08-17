@@ -1,12 +1,14 @@
 FROM debian:bookworm-backports
 
-# Install PHP and dependencies
-RUN apt-get update && apt-get -y install curl \
+# Install PHP, dependencies, redis-cli, and php-redis
+RUN apt-get update && apt-get -y install \
+    curl \
     php php-cli php-cgi php-mysql \
     php-fpm php-pdo php-gd php-mbstring \
     mariadb-client \
-    redis \
-	php-redis \
+    redis-tools \
+    php-redis \
+    iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Install WP-CLI

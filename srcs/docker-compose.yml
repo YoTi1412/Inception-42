@@ -45,6 +45,7 @@ services:
     container_name: wordpress
     depends_on:
       - mariadb
+      - redis 
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
@@ -59,8 +60,6 @@ services:
   redis:
     container_name: redis
     build: ./requirements/bonus/redis
-    ports:
-      - '6379:6379'
     restart: always
     env_file:
       - .env
@@ -71,7 +70,6 @@ services:
     container_name: ftp_server
     depends_on:
       - nginx
-      - redis
     build:
       context: ./requirements/bonus/ftp_server
       dockerfile: Dockerfile

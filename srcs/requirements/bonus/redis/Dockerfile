@@ -1,8 +1,8 @@
 FROM debian:bookworm-backports
 
-RUN		apt-get update
-RUN		apt-get install -y redis \
-		&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y redis-server && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY ./tools/redis.sh /tmp/redis.sh
 
