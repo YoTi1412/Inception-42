@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Read REDIS_PASSWORD from Docker secret
+REDIS_PASSWORD=$(cat /run/secrets/redis_password)
+
 # Log environment for debugging
 echo "🔍 Environment variables:"
 env
@@ -31,12 +34,13 @@ sed -i 's|^# maxmemory-policy noeviction|maxmemory-policy allkeys-lru|g' /etc/re
 sed -i 's|^daemonize yes|daemonize no|g' /etc/redis/redis.conf
 sed -i 's|^timeout 0|timeout 0|g' /etc/redis/redis.conf
 
-# Add password if set
+# Add password
 if [ -n "$REDIS_PASSWORD" ]; then
     echo "requirepass $REDIS_PASSWORD" >> /etc/redis/redis.conf
     echo "✅ Redis password set"
 else
-    echo "⚠️ REDIS_PASSWORD not set, running without authentication"
+    echo "❌ REDIS_PASSWORD not set in /run/secrets/redis_password"
+    exit 1
 fi
 
 # Start Redis server

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Read FTP_PASSWORD from Docker secret
+FTP_PASSWORD=$(cat /run/secrets/ftp_password)
+
 if [ ! -f "/etc/vsftpd/vsftpd.conf.bak" ]; then
 
     echo "[+] Initial FTP setup..."

@@ -1,10 +1,14 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 echo "⏳ Waiting for MariaDB ($MYSQL_HOSTNAME) to be ready..."
 
+MYSQL_PASSWORD=$(cat /run/secrets/db_password)
+WP_SECOND_PASS=$(cat /run/secrets/wp_second_password)
+REDIS_PASSWORD=$(cat /run/secrets/redis_password)
+
 # Wait for MariaDB to be fully ready (up to 60 seconds)
-for i in {1..10}; do
+for i in $(seq 1 30); do
     if mysqladmin ping -h"$MYSQL_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; then
         if mysql -h"$MYSQL_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SHOW DATABASES;" >/dev/null 2>&1; then
             echo "✅ MariaDB is fully up and accessible!"
@@ -38,7 +42,7 @@ if [ ! -f /var/www/html/wp-config.php ]; then
         --url="https://${DOMAIN_NAME}" \
         --title="Inception-42" \
         --admin_user="$MYSQL_USER" \
-        --admin_password="$MYSQL_ROOT_PASSWORD" \
+        --admin_password="$(cat /run/secrets/db_root_password)" \
         --admin_email="$WP_ADMIN_EMAIL" \
         --skip-email \
         --allow-root
@@ -67,7 +71,7 @@ fi
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 
-## redis ##
+# redis
 echo "🔧 Configuring Redis..."
 if ping -c 1 redis >/dev/null 2>&1; then
     wp config set WP_REDIS_HOST redis --allow-root
@@ -79,7 +83,7 @@ if ping -c 1 redis >/dev/null 2>&1; then
     wp plugin update --all --allow-root
     wp redis enable --allow-root || echo "⚠️ Failed to enable Redis Object Cache, continuing..."
 fi
-  echo "✅ Redis is up"
+echo "✅ Redis is up"
 
 # Start PHP-FPM
 echo "🚀 Starting PHP-FPM..."

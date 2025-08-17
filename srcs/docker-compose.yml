@@ -40,6 +40,10 @@ services:
     restart: always
     env_file:
       - .env
+    secrets:
+      - db_root_password
+      - db_password
+      - wp_second_password
 
   wordpress:
     container_name: wordpress
@@ -56,6 +60,10 @@ services:
       - wordpress_data:/var/www/html
     networks:
       - network
+    secrets:
+      - db_password
+      - wp_second_password
+      - redis_password
 
   redis:
     container_name: redis
@@ -65,6 +73,8 @@ services:
       - .env
     networks:
       - network
+    secrets:
+      - redis_password
 
   ftp_server:
     container_name: ftp_server
@@ -83,9 +93,10 @@ services:
       - network
     volumes:
       - wordpress_data:/var/www/html:ro
+    secrets:
+      - ftp_password
     environment:
       - FTP_USER=${FTP_USER}
-      - FTP_PASSWORD=${FTP_PASSWORD}
 
   adminer:
     container_name: adminer
@@ -115,6 +126,18 @@ services:
       - portainer_data:/data
     networks:
       - network
+
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
+  wp_second_password:
+    file: ../secrets/wp_second_password.txt
+  redis_password:
+    file: ../secrets/redis_password.txt
+  ftp_password:
+    file: ../secrets/ftp_password.txt
 
 volumes:
   mariadb_data:

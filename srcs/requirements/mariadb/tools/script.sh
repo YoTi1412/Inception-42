@@ -3,7 +3,9 @@ set -e
 
 DATADIR="/var/lib/mysql"
 SOCKET="/run/mysqld/mysqld.sock"
-ROOT_PWD="$MYSQL_ROOT_PASSWORD"
+ROOT_PWD=$(cat /run/secrets/db_root_password)
+MYSQL_PASSWORD=$(cat /run/secrets/db_password)
+WP_SECOND_PASS=$(cat /run/secrets/wp_second_password)
 INIT_SQL="/tmp/init.sql"
 
 echo "🔧 MariaDB one-shot bootstrap"
@@ -20,11 +22,11 @@ chmod 775 /run/mysqld
 # 3. Check if database is already initialized and WordPress DB exists
 if [[ -d "$DATADIR/mysql" && -f "$DATADIR/ibdata1" ]]; then
     echo "✅ Database system already initialized, checking WordPress DB..."
-    
+
     # Start temporary MariaDB (socket only)
     mysqld --user=mysql --datadir="$DATADIR" --skip-networking --socket="$SOCKET" &
     PID=$!
-    
+
     # Wait until ready
     for i in {1..20}; do
         if mysqladmin ping --socket="$SOCKET" --silent; then
@@ -32,7 +34,7 @@ if [[ -d "$DATADIR/mysql" && -f "$DATADIR/ibdata1" ]]; then
         fi
         sleep 1
     done
-    
+
     # Check if WordPress DB has at least one table
     if mysql --socket="$SOCKET" -uroot -p"$ROOT_PWD" -e "USE ${MYSQL_DATABASE}; SHOW TABLES;" | grep -q .; then
         echo "✅ WordPress DB already exists with tables, skipping init."
@@ -59,6 +61,8 @@ mysql_install_db --user=mysql --datadir="$DATADIR" --skip-test-db
 # 6. Create init SQL file
 cat > "$INIT_SQL" << EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PWD}';
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '${ROOT_PWD}';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
 CREATE USER IF NOT EXISTS 'viewer'@'%' IDENTIFIED BY '${WP_SECOND_PASS}';
@@ -102,6 +106,7 @@ else
     echo "❌ Failed to create MySQL user '${MYSQL_USER}'"
     exit 1
 fi
+
 if mysql --socket="$SOCKET" -uroot -p"$ROOT_PWD" -e "SELECT User FROM mysql.user WHERE User IN ('${MYSQL_USER}', 'viewer');" | grep -q "viewer"; then
     echo "✅ MySQL user 'viewer' created successfully"
 else
