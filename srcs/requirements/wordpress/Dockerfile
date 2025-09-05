@@ -1,27 +1,22 @@
 FROM debian:bookworm-backports
 
-# Install PHP, dependencies, redis-cli, and php-redis
-RUN apt-get update && apt-get -y install \
+# Install PHP, MariaDB client, Redis, and dependencies
+RUN apt-get update && apt-get install -y \
     curl \
-    php php-cli php-cgi php-mysql \
-    php-fpm php-pdo php-gd php-mbstring \
     mariadb-client \
+    php php-fpm php-mysql php-redis php-cli php-mbstring php-gd \
     redis-tools \
-    php-redis \
     iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Install WP-CLI
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
+RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x /usr/local/bin/wp
 
 # Copy PHP-FPM pool config
 COPY ./conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
-# Create PHP run dir
-RUN mkdir -p /run/php
-
-# Copy and prepare WordPress install script
+# WordPress setup script
 COPY ./tools/create_wp.sh /usr/local/bin/create_wp.sh
 RUN chmod +x /usr/local/bin/create_wp.sh
 

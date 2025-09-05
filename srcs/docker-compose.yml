@@ -61,6 +61,7 @@ services:
     networks:
       - network
     secrets:
+      - db_root_password
       - db_password
       - wp_second_password
       - redis_password
@@ -92,7 +93,7 @@ services:
     networks:
       - network
     volumes:
-      - wordpress_data:/var/www/html:ro
+      - wordpress_data:/var/www/html
     secrets:
       - ftp_password
     environment:
@@ -117,9 +118,8 @@ services:
       context: ./requirements/bonus/portainer
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "9000:9000"
     environment:
+      - TRUSTED_ORIGINS=yoti.42.fr
       - TZ=Europe/Paris
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -144,19 +144,19 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/yrafai/data/mysql
+      device: /home/yoti/data/mysql
       o: bind
   wordpress_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yrafai/data/wordpress
+      device: /home/yoti/data/wordpress
       o: bind
   portainer_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yrafai/data/portainer
+      device: /home/yoti/data/portainer
       o: bind
 
 networks:

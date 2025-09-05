@@ -1,21 +1,17 @@
 FROM debian:bookworm-backports
 
-# Install MariaDB Server
 RUN apt-get update && \
     apt-get install -y mariadb-server mariadb-client && \
     rm -rf /var/lib/apt/lists/*
 
-# Prepare MySQL runtime directory
-RUN mkdir -p /var/run/mysqld && \
-    chown -R mysql:mysql /var/run/mysqld && \
-    chmod 775 /var/run/mysqld
+RUN mkdir -p /var/run/mysqld /var/lib/mysql && \
+    chown -R mysql:mysql /var/run/mysqld /var/lib/mysql
 
-# Create MySQL data directory
-RUN mkdir -p /var/lib/mysql && \
-    chown -R mysql:mysql /var/lib/mysql
+COPY ./conf/50-server.cnf /etc/mysql/conf.d/50-server.cnf
 
 COPY ./tools/script.sh /usr/local/bin/script.sh
 RUN chmod +x /usr/local/bin/script.sh
 
 EXPOSE 3306
+
 ENTRYPOINT ["/usr/local/bin/script.sh"]
