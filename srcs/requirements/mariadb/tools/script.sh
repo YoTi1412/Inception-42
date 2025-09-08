@@ -10,7 +10,7 @@ mkdir -p /run/mysqld "$DATADIR"
 chown -R mysql:mysql /run/mysqld "$DATADIR"
 
 if [ ! -d "$DATADIR/mysql" ]; then
-    mysql_install_db --user=mysql --datadir="$DATADIR" --auth-root-authentication-method=normal
+    mysql_install_db --user=mysql --datadir="$DATADIR"
 
     cat > "$INIT_SQL" << EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PWD}';

@@ -10,6 +10,7 @@ until mysqladmin ping -h"$MYSQL_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --
   echo "MariaDB not ready yet, retrying in 2 s..."
   sleep 2
 done
+
 echo "✅ MariaDB is up!"
 
 if [ ! -f /var/www/html/wp-config.php ]; then
