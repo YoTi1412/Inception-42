@@ -1,15 +1,15 @@
 NAME	= inception
+
 DC		= docker-compose -f srcs/docker-compose.yml
 
 all: up
 
 build:
 	@echo "🔨 Building Docker images..."
-	@$(DC) build
+	@$(DC) build #--no-cache
 
 up:
-	@echo "🚀 Setting up and starting containers..."
-	@./setup.sh
+	@echo "🚀 Starting containers..."
 	@$(DC) up -d
 
 down:
@@ -21,21 +21,13 @@ restart:
 	@$(DC) restart
 
 fclean:
-	@echo "🔥 Removing containers and images (preserving data)..."
-	@$(DC) down --rmi all
-	@docker image prune -f
-	@docker network prune -f
+	@echo "🔥 Removing containers, volumes, images..."
+	@$(DC) down -v --rmi all
 	@docker volume prune -f
-
-nuke:
-	@echo "💥 Removing everything, including data..."
-	@./setup.sh --nuke
-	@$(DC) down --rmi all
-	@docker image prune -f
+	@docker image prune -af
 	@docker network prune -f
-	@docker volume prune -f
 
 re: fclean build up
 	@echo "✅ Project rebuilt successfully."
 
-.PHONY: all build up down restart fclean nuke re
+.PHONY: all build up down restart fclean re
