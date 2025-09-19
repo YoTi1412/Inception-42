@@ -42,15 +42,13 @@ if [ ! -f /var/www/html/wp-config.php ]; then
 fi
 
 echo "🔧 Configuring Redis..."
-if ping -c 1 redis >/dev/null 2>&1; then
-    wp config set WP_REDIS_HOST redis --allow-root
-    wp config set WP_REDIS_PORT 6379 --raw --allow-root
-    wp config set WP_CACHE_KEY_SALT "$DOMAIN_NAME" --allow-root
-    wp config set WP_REDIS_PASSWORD "$REDIS_PASSWORD" --allow-root
-    wp config set WP_REDIS_CLIENT predis --allow-root
-    wp plugin install redis-cache --activate --allow-root
-    wp redis enable --allow-root || echo "⚠️ Redis failed, continuing..."
-fi
+wp config set WP_REDIS_HOST redis --allow-root
+wp config set WP_REDIS_PORT 6379 --raw --allow-root
+wp config set WP_CACHE_KEY_SALT "$DOMAIN_NAME" --allow-root
+wp config set WP_REDIS_PASSWORD "$REDIS_PASSWORD" --allow-root
+wp config set WP_REDIS_CLIENT predis --allow-root
+wp plugin install redis-cache --activate --allow-root
+wp redis enable --allow-root || echo "⚠️ Redis failed, continuing..."
 
 echo "🚀 Starting PHP-FPM..."
 exec /usr/sbin/php-fpm8.2 -F
