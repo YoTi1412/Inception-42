@@ -1,7 +1,7 @@
 services:
   nginx:
     container_name: nginx
-    build: 
+    build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
     depends_on:
@@ -49,7 +49,7 @@ services:
     container_name: wordpress
     depends_on:
       - mariadb
-      - redis 
+      - redis
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
@@ -79,15 +79,13 @@ services:
 
   ftp_server:
     container_name: ftp_server
-    depends_on:
-      - nginx
     build:
       context: ./requirements/bonus/ftp_server
       dockerfile: Dockerfile
     restart: always
     ports:
-      - 21:21
-      - 21100-21110:21100-21110
+      - "21:21"
+      - "21100-21110:21100-21110"
     env_file:
       - .env
     networks:
@@ -96,8 +94,6 @@ services:
       - wordpress_data:/var/www/html
     secrets:
       - ftp_password
-    environment:
-      - FTP_USER=${FTP_USER}
 
   adminer:
     container_name: adminer
