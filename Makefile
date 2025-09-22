@@ -16,10 +16,6 @@ down:
 	@echo "🛑 Stopping containers..."
 	@$(DC) down
 
-restart:
-	@echo "🔄 Restarting containers..."
-	@$(DC) restart
-
 fclean:
 	@echo "🔥 Removing containers, volumes, images..."
 	@$(DC) down -v --rmi all
@@ -29,5 +25,3 @@ fclean:
 
 re: fclean build up
 	@echo "✅ Project rebuilt successfully."
-
-.PHONY: all build up down restart fclean re
