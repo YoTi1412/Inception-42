@@ -25,4 +25,8 @@ wp config set WP_REDIS_CLIENT predis --allow-root
 wp plugin install redis-cache --activate --allow-root
 wp redis enable --allow-root || true
 
+chown -R www-data:www-data /var/www/html
+find /var/www/html -type d -exec chmod 775 {} \; 2>/dev/null || true
+find /var/www/html -type f -exec chmod 664 {} \; 2>/dev/null || true
+
 exec /usr/sbin/php-fpm8.2 -F

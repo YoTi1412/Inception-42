@@ -94,6 +94,8 @@ services:
       - wordpress_data:/var/www/html
     secrets:
       - ftp_password
+    depends_on:
+      - wordpress
 
   adminer:
     container_name: adminer

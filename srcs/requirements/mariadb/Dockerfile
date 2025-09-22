@@ -9,7 +9,7 @@ RUN mkdir -p /var/run/mysqld /var/lib/mysql && \
 
 RUN sed -i "s/127.0.0.1/0.0.0.0/" /etc/mysql/mariadb.conf.d/50-server.cnf
 
-COPY ./tools/script.sh /usr/local/bin/script.sh
+COPY tools/script.sh /usr/local/bin/script.sh
 RUN chmod +x /usr/local/bin/script.sh
 
 EXPOSE 3306
