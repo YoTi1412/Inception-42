@@ -2,13 +2,11 @@
 
 FTP_PASSWORD=$(cat /run/secrets/ftp_password)
 
-# One-time setup check
 if [ ! -f /etc/vsftpd/vsftpd.conf.bak ]; then
     echo "Setting up FTP server..."
 
     mkdir -p /etc/vsftpd
 
-    # Create FTP user
     if ! id "$FTP_USER" >/dev/null 2>&1; then
         adduser --disabled-password --gecos "" "$FTP_USER"
         usermod -a -G www-data "$FTP_USER"
@@ -21,6 +19,7 @@ anonymous_enable=NO
 local_enable=YES
 write_enable=YES
 chroot_local_user=YES
+allow_writeable_chroot=YES
 local_root=/var/www/html
 listen=YES
 listen_port=21
@@ -30,10 +29,14 @@ pasv_max_port=21110
 userlist_enable=YES
 userlist_file=/etc/vsftpd.userlist
 userlist_deny=NO
+local_umask=002
 ftpd_banner=Welcome to FTP server of inception!
 EOF
 
     cp /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.bak
+
+    chown root:www-data /var/www/html
+    chmod 755 /var/www/html
 fi
 
 mkdir -p /var/run/vsftpd/empty
