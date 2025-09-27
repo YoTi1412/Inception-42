@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Load secrets
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 WP_SECOND_PASS=$(cat /run/secrets/wp_second_password)
 REDIS_PASSWORD=$(cat /run/secrets/redis_password)
@@ -11,10 +12,21 @@ done
 
 if [ ! -f /var/www/html/wp-config.php ]; then
   wp core download --allow-root --force
-  wp config create --dbname="$MYSQL_DATABASE" --dbuser="$MYSQL_USER" --dbpass="$MYSQL_PASSWORD" --dbhost="$MYSQL_HOSTNAME" --allow-root --force
-  wp core install --url="https://${DOMAIN_NAME}" --title="Inception-42" --admin_user="$MYSQL_USER" --admin_password="$ROOT_PWD" --admin_email="$WP_ADMIN_EMAIL" --skip-email --allow-root
-  wp user create "$WP_SECOND_USER" "$WP_SECOND_EMAIL" --user_pass="$WP_SECOND_PASS" --role=subscriber --allow-root ||
-  wp user update "$WP_SECOND_USER" --user_pass="$WP_SECOND_PASS" --user_email="$WP_SECOND_EMAIL" --role=subscriber --allow-root
+  wp config create \
+    --dbname="$MYSQL_DATABASE" \
+    --dbuser="$MYSQL_USER" \
+    --dbpass="$MYSQL_PASSWORD" \
+    --dbhost="$MYSQL_HOSTNAME" \
+    --allow-root --force
+  wp core install \
+    --url="https://${DOMAIN_NAME}" \
+    --title="Inception-42" \
+    --admin_user="$MYSQL_USER" \
+    --admin_password="$ROOT_PWD" \
+    --admin_email="$WP_ADMIN_EMAIL" \
+    --skip-email --allow-root
+  wp user create "$WP_SECOND_USER" "$WP_SECOND_EMAIL" \
+    --user_pass="$WP_SECOND_PASS" --role=subscriber --allow-root || true
 fi
 
 wp config set WP_REDIS_HOST redis --allow-root
@@ -26,7 +38,7 @@ wp plugin install redis-cache --activate --allow-root
 wp redis enable --allow-root || true
 
 chown -R www-data:www-data /var/www/html
-find /var/www/html -type d -exec chmod 775 {} \; 2>/dev/null || true
-find /var/www/html -type f -exec chmod 664 {} \; 2>/dev/null || true
+find /var/www/html -type d -exec chmod 775 {} \;
+find /var/www/html -type f -exec chmod 664 {} \;
 
 exec /usr/sbin/php-fpm8.2 -F
