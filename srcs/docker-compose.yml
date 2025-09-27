@@ -24,11 +24,10 @@ services:
     build:
       context: ./requirements/bonus/static_page
       dockerfile: Dockerfile
-    restart: always
+    volumes:
+      - wordpress_data:/var/www/html
     networks:
       - network
-    env_file:
-      - .env
 
   mariadb:
     container_name: mariadb
