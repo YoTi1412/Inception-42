@@ -1,22 +1,32 @@
 #!/bin/bash
 
 DATADIR="/var/lib/mysql"
-ROOT_PWD=$(cat /run/secrets/db_root_password)
-MYSQL_PASSWORD=$(cat /run/secrets/db_password)
-WP_SECOND_PASS=$(cat /run/secrets/wp_second_password)
+ROOT_PWD=$(cat /run/secrets/db_root_password | tr -d '\n')
+MYSQL_PASSWORD=$(cat /run/secrets/db_password | tr -d '\n')
+WP_SECOND_PASS=$(cat /run/secrets/wp_second_password | tr -d '\n')
 
 if [ ! -d "$DATADIR/mysql" ]; then
-  mysql_install_db --user=mysql --datadir="$DATADIR"
+    mysql_install_db --user=mysql --datadir="$DATADIR"
 fi
 
 cat << EOF > /tmp/init.sql
-ALTER USER 'root'@'localhost' IDENTIFIED BY '$ROOT_PWD';
-CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\`;
+-- Create root user if not exists and grant global privileges
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$ROOT_PWD';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+
+-- Create WordPress database
+CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;
+
+-- Create main WordPress user
 CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';
+
+-- Create secondary WordPress user (read-only)
 CREATE USER IF NOT EXISTS '$WP_SECOND_USER'@'%' IDENTIFIED BY '$WP_SECOND_PASS';
-GRANT ALL PRIVILEGES ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%';
-GRANT SELECT ON \`$MYSQL_DATABASE\`.* TO '$WP_SECOND_USER'@'%';
+GRANT SELECT ON $MYSQL_DATABASE.* TO '$WP_SECOND_USER'@'%';
+
+-- Apply privileges
 FLUSH PRIVILEGES;
 EOF
 
-mysqld --user=mysql --bind-address=0.0.0.0 --init-file=/tmp/init.sql
+exec mysqld --user=mysql --bind-address=0.0.0.0 --init-file=/tmp/init.sql
