@@ -24,8 +24,7 @@ services:
     build:
       context: ./requirements/bonus/static_page
       dockerfile: Dockerfile
-    volumes:
-      - wordpress_data:/var/www/html
+    restart: always
     networks:
       - network
 
@@ -115,12 +114,11 @@ services:
       context: ./requirements/bonus/portainer
       dockerfile: Dockerfile
     restart: always
-    environment:
-      - TRUSTED_ORIGINS=yoti.42.fr
-      - TZ=Europe/Paris
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    secrets:
+      - portainer_password
     networks:
       - network
 
@@ -135,6 +133,8 @@ secrets:
     file: ../secrets/redis_password.txt
   ftp_password:
     file: ../secrets/ftp_password.txt
+  portainer_password:
+    file: ../secrets/portainer_password.txt
 
 volumes:
   mariadb_data:

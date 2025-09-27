@@ -13,12 +13,16 @@ RUN apt-get update && \
     bash \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install Docker Compose CLI plugin
 RUN mkdir -p /root/.docker/cli-plugins && \
     curl -SL https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64 \
     -o /root/.docker/cli-plugins/docker-compose && \
     chmod +x /root/.docker/cli-plugins/docker-compose
 
 WORKDIR /app
+
+ENV PORTAINER_VERSION=2.27.9 \
+    TRUSTED_ORIGINS=yoti.42.fr
 
 COPY tools/portainer-entrypoint.sh /usr/local/bin/portainer-entrypoint.sh
 RUN chmod +x /usr/local/bin/portainer-entrypoint.sh
