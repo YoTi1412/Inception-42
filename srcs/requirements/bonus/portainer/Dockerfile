@@ -22,7 +22,7 @@ RUN mkdir -p /root/.docker/cli-plugins && \
 WORKDIR /app
 
 ENV PORTAINER_VERSION=2.27.9 \
-    TRUSTED_ORIGINS=yoti.42.fr
+    TRUSTED_ORIGINS=yrafai.42.fr
 
 COPY tools/portainer-entrypoint.sh /usr/local/bin/portainer-entrypoint.sh
 RUN chmod +x /usr/local/bin/portainer-entrypoint.sh

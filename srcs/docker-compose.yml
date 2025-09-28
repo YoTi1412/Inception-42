@@ -42,6 +42,7 @@ services:
       - db_root_password
       - db_password
       - wp_second_password
+      - adminer_password
 
   wordpress:
     container_name: wordpress
@@ -135,25 +136,27 @@ secrets:
     file: ../secrets/ftp_password.txt
   portainer_password:
     file: ../secrets/portainer_password.txt
+  adminer_password:
+    file: ../secrets/adminer_password.txt
 
 volumes:
   mariadb_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yoti/data/mysql
+      device: /home/yrafai/data/mysql
       o: bind
   wordpress_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yoti/data/wordpress
+      device: /home/yrafai/data/wordpress
       o: bind
   portainer_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/yoti/data/portainer
+      device: /home/yrafai/data/portainer
       o: bind
 
 networks:

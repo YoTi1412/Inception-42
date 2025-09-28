@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ ! -f /etc/nginx/ssl/yoti.crt ]; then
-    certtool --generate-privkey --key-type rsa --bits 3072 --outfile /etc/nginx/ssl/yoti.key
+if [ ! -f /etc/nginx/ssl/yrafai.crt ]; then
+    certtool --generate-privkey --key-type rsa --bits 3072 --outfile /etc/nginx/ssl/yrafai.key
 
     echo "cn = $DOMAIN_NAME \
           dns_name = $DOMAIN_NAME \
@@ -10,11 +10,11 @@ if [ ! -f /etc/nginx/ssl/yoti.crt ]; then
           signing_key \
           encryption_key" > /tmp/cert_template.txt
 
-    certtool --generate-self-signed --load-privkey /etc/nginx/ssl/yoti.key --template /tmp/cert_template.txt --outfile /etc/nginx/ssl/yoti.crt
+    certtool --generate-self-signed --load-privkey /etc/nginx/ssl/yrafai.key --template /tmp/cert_template.txt --outfile /etc/nginx/ssl/yrafai.crt
 
     rm -f /tmp/cert_template.txt
 
-    chmod 600 /etc/nginx/ssl/yoti.key /etc/nginx/ssl/yoti.crt
+    chmod 600 /etc/nginx/ssl/yrafai.key /etc/nginx/ssl/yrafai.crt
 fi
 
 exec nginx -g "daemon off;"
