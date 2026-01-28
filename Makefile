@@ -5,23 +5,23 @@ DC		= docker compose -f srcs/docker-compose.yml
 all: up
 
 build:
-	@echo "🔨 Building Docker images..."
+	@echo " Building Docker images..."
 	@$(DC) build #--no-cache
 
 up:
-	@echo "🚀 Starting containers..."
+	@echo " Starting containers..."
 	@$(DC) up -d
 
 down:
-	@echo "🛑 Stopping containers..."
+	@echo " Stopping containers..."
 	@$(DC) down
 
 fclean:
-	@echo "🔥 Removing containers, volumes, images..."
+	@echo " Removing containers, volumes, images..."
 	@$(DC) down -v --rmi all
 	@docker volume prune -f
 	@docker image prune -af
 	@docker network prune -f
 
 re: fclean build up
-	@echo "✅ Project rebuilt successfully."
+	@echo " Project rebuilt successfully."

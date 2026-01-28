@@ -298,7 +298,7 @@ In addition, it is possible to separate the web server and PHP by establishing a
   1. Clone the Project folder:
 
       ```
-       git clone https://github.com/yoti1412/inception.git
+       git clone https://github.com/yoti1412/inception-42.git
      ```
   2. accede to the folder:
 
